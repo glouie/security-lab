@@ -294,6 +294,8 @@ const App = {
   },
 };
 
+window.App = App;
+
 // ── Helpers ──────────────────────────────────────────────────────────
 function buildCommand(action, params) {
   const map = {
