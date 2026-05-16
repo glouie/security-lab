@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Security Breach Lab</title>
+<script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.5/dist/socket.io.min.js"></script>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ── INTRO SCREEN ── -->
+  <div id="intro-screen" class="screen active">
+    <div class="intro-inner">
+      <div class="intro-logo">SEC<span>LAB</span></div>
+      <div class="intro-sub">Interactive Security Breach Lab</div>
+      <p class="intro-desc">
+        Six lessons. Real servers. Real attacks. You play the attacker.<br>
+        Each lesson shows a missing security layer — and what happens when you exploit it.
+      </p>
+      <div class="osi-map" id="osi-map"></div>
+      <div class="lesson-grid" id="intro-lesson-grid"></div>
+      <button class="btn-start" onclick="App.startLab()">Enter the Lab →</button>
+    </div>
+  </div>
+
+  <!-- ── LAB SCREEN ── -->
+  <div id="lab-screen" class="screen">
+
+    <!-- Header -->
+    <header>
+      <div class="hdr-left">
+        <button class="back-btn" onclick="App.goIntro()">← Lessons</button>
+        <span class="hdr-lesson" id="hdr-lesson-title">—</span>
+      </div>
+      <div class="hdr-center">
+        <div class="chapter-steps" id="chapter-steps"></div>
+      </div>
+      <div class="hdr-right">
+        <button class="btn-reset" onclick="App.reset()">↺ Reset</button>
+        <div class="status-dot" id="status-dot" title="Lab status"></div>
+      </div>
+    </header>
+
+    <!-- Main layout -->
+    <div class="lab-layout">
+
+      <!-- Left: lesson nav -->
+      <aside class="lesson-sidebar" id="lesson-sidebar"></aside>
+
+      <!-- Center: theater + console -->
+      <div class="lab-center">
+
+        <!-- Context strip -->
+        <div class="context-strip" id="context-strip">
+          <span class="ctx-layer" id="ctx-layer"></span>
+          <span class="ctx-text" id="ctx-text"></span>
+        </div>
+
+        <!-- Three panels -->
+        <div class="theater" id="theater">
+          <div class="t-panel" id="panel-client">
+            <div class="t-header">
+              <span class="t-dot r"></span><span class="t-dot y"></span><span class="t-dot g"></span>
+              <span class="t-title" id="title-client">client</span>
+              <span class="t-badge badge-client">CLIENT</span>
+            </div>
+            <div class="t-body" id="out-client"></div>
+          </div>
+
+          <div class="wire-col">
+            <div class="wire-line"></div>
+            <div class="wire-label" id="wire-label">WIRE</div>
+            <div class="wire-line"></div>
+            <div class="packet-track" id="packet-track">
+              <div class="packet" id="pkt"></div>
+            </div>
+          </div>
+
+          <div class="t-panel" id="panel-server">
+            <div class="t-header">
+              <span class="t-dot r"></span><span class="t-dot y"></span><span class="t-dot g"></span>
+              <span class="t-title" id="title-server">server</span>
+              <span class="t-badge badge-server">SERVER</span>
+            </div>
+            <div class="t-body" id="out-server"></div>
+          </div>
+        </div>
+
+        <!-- Wire panel (attacker view) -->
+        <div class="wire-panel">
+          <div class="t-header">
+            <span class="t-dot r"></span><span class="t-dot y"></span><span class="t-dot g"></span>
+            <span class="t-title" id="wire-panel-title">wire / attacker</span>
+            <span class="t-badge badge-attacker">ATTACKER VIEW</span>
+          </div>
+          <div class="t-body" id="out-wire"></div>
+        </div>
+
+        <!-- Phase hint -->
+        <div class="phase-hint" id="phase-hint"></div>
+
+        <!-- Attacker console -->
+        <div class="console-wrap">
+          <div class="console-header">
+            <span class="console-title">▸ attacker@kali:~$</span>
+            <div class="console-actions">
+              <button class="btn-edit" id="btn-edit" onclick="App.toggleEdit()">✎ Edit</button>
+              <button class="btn-run"  id="btn-run"  onclick="App.execute()">▶ Execute</button>
+            </div>
+          </div>
+          <div class="console-cmd" id="console-cmd" contenteditable="false" spellcheck="false"></div>
+          <div class="console-fields" id="console-fields"></div>
+        </div>
+
+        <!-- Nav -->
+        <div class="phase-nav">
+          <button class="btn-prev" id="btn-prev" onclick="App.prevPhase()">◀</button>
+          <div class="phase-dots" id="phase-dots"></div>
+          <button class="btn-next" id="btn-next" onclick="App.nextPhase()">▶</button>
+        </div>
+
+      </div>
+
+      <!-- Right: state panel -->
+      <div class="state-sidebar">
+        <div class="state-block">
+          <div class="state-title">SERVER STATE</div>
+          <div id="state-orders"></div>
+          <div id="state-credits"></div>
+        </div>
+        <div class="state-block">
+          <div class="state-title">DEFENSES</div>
+          <div id="defense-toggles"></div>
+        </div>
+        <div class="state-block" id="tls-timeline-block" style="display:none">
+          <div class="state-title">TLS TIMELINE</div>
+          <div id="tls-timeline"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+<script src="/app.js"></script>
+</body>
+</html>

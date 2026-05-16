@@ -1,0 +1,82 @@
+version: "3.9"
+
+networks:
+  lab-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+services:
+
+  victim:
+    build: ./victim
+    container_name: lab-victim
+    hostname: victim
+    networks:
+      lab-net:
+        ipv4_address: 172.20.0.10
+    environment:
+      - WEBHOOK_SECRET=whsec_dev_secret_12345
+      - REDIS_URL=redis://172.20.0.40:6379
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  attacker:
+    build: ./attacker
+    container_name: lab-attacker
+    hostname: attacker
+    networks:
+      lab-net:
+        ipv4_address: 172.20.0.20
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VICTIM_HTTP=http://172.20.0.10:8080
+      - VICTIM_HTTPS=https://172.20.0.10:8443
+      - MITM_PROXY=http://172.20.0.30:8888
+      - DASHBOARD_URL=http://172.20.0.50:3000
+      - WEBHOOK_SECRET=whsec_dev_secret_12345
+    depends_on:
+      - victim
+      - mitm
+    restart: unless-stopped
+
+  mitm:
+    build: ./mitm
+    container_name: lab-mitm
+    hostname: mitm
+    networks:
+      lab-net:
+        ipv4_address: 172.20.0.30
+    environment:
+      - DASHBOARD_URL=http://172.20.0.50:3000
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: lab-redis
+    hostname: redis
+    networks:
+      lab-net:
+        ipv4_address: 172.20.0.40
+    restart: unless-stopped
+
+  dashboard:
+    build: ./dashboard
+    container_name: lab-dashboard
+    hostname: dashboard
+    networks:
+      lab-net:
+        ipv4_address: 172.20.0.50
+    ports:
+      - "3000:3000"
+    environment:
+      - ATTACKER_URL=http://172.20.0.20:5001
+      - VICTIM_URL=http://172.20.0.10:8080
+      - REDIS_URL=redis://172.20.0.40:6379
+    depends_on:
+      - attacker
+      - victim
+    restart: unless-stopped
