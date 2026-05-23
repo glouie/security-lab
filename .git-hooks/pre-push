@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Global pre-push hook — delegates to Python orchestrator
+set -euo pipefail
+
+HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec python3 "$HOOK_DIR/pre-push.py" "$@"
