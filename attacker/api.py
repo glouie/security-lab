@@ -10,6 +10,7 @@ VICTIM_HTTP    = os.environ.get("VICTIM_HTTP",  "http://172.20.0.10:8080")
 VICTIM_HTTPS   = os.environ.get("VICTIM_HTTPS", "https://172.20.0.10:8443")
 MITM_PROXY     = os.environ.get("MITM_PROXY",   "http://172.20.0.30:8888")
 WEBHOOK_SECRET = os.environ.get("WEBHOOK_SECRET", "whsec_dev_secret_12345")
+DEBUG          = os.environ.get("FLASK_DEBUG", "0") == "1"
 
 STATE = {
     "captured_requests":  [],
@@ -35,7 +36,7 @@ def normal_login():
     password = data.get("password", "hunter2")
     lines = [
         {"panel": "client", "line": f"$ curl -X POST {VICTIM_HTTP}/login \\", "style": "cmd"},
-        {"panel": "client", "line": f'     -d \'{{"username":"{username}","password":"{password}"}}\'', "style": "cmd"},
+        {"panel": "client", "line": f'     -d \'{{{"username}":"{username}","password":"{password}"}}\'', "style": "cmd"},
     ]
     try:
         r = req.post(f"{VICTIM_HTTP}/login", json={"username": username, "password": password}, timeout=5)
@@ -59,7 +60,7 @@ def sniff_login():
     lines = [
         {"panel": "wire",   "line": "mitmproxy listening on :8888", "style": "amber"},
         {"panel": "client", "line": f"$ curl -x {MITM_PROXY} -X POST {VICTIM_HTTP}/login \\", "style": "cmd"},
-        {"panel": "client", "line": f'     -d \'{{"username":"{username}","password":"{password}"}}\'', "style": "cmd"},
+        {"panel": "client", "line": f'     -d \'{{{"username"}":"{username}","password":"{password}"}}\'', "style": "cmd"},
     ]
     try:
         r = req.post(f"{VICTIM_HTTP}/login", json={"username": username, "password": password},
@@ -265,4 +266,4 @@ def reset():
     return jsonify({"status": "reset"})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=False)
+    app.run(host="0.0.0.0", port=5001, debug=DEBUG, use_reloader=True)

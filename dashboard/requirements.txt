@@ -1,3 +1,4 @@
 flask==3.0.3
 flask-socketio==5.3.6
 requests==2.31.0
+livereload==2.6.3

@@ -19,6 +19,9 @@ services:
     environment:
       - WEBHOOK_SECRET=whsec_dev_secret_12345
       - REDIS_URL=redis://172.20.0.40:6379
+      - FLASK_DEBUG=1
+    volumes:
+      - ./victim/server.py:/app/server.py
     depends_on:
       - redis
     restart: unless-stopped
@@ -38,6 +41,9 @@ services:
       - MITM_PROXY=http://172.20.0.30:8888
       - DASHBOARD_URL=http://172.20.0.50:3000
       - WEBHOOK_SECRET=whsec_dev_secret_12345
+      - FLASK_DEBUG=1
+    volumes:
+      - ./attacker/api.py:/app/api.py
     depends_on:
       - victim
       - mitm
@@ -52,6 +58,8 @@ services:
         ipv4_address: 172.20.0.30
     environment:
       - DASHBOARD_URL=http://172.20.0.50:3000
+    volumes:
+      - ./mitm/addon.py:/addon.py
     restart: unless-stopped
 
   redis:
@@ -76,6 +84,11 @@ services:
       - ATTACKER_URL=http://172.20.0.20:5001
       - VICTIM_URL=http://172.20.0.10:8080
       - REDIS_URL=redis://172.20.0.40:6379
+      - FLASK_DEBUG=1
+    volumes:
+      - ./dashboard/app.py:/app/app.py
+      - ./dashboard/lessons.py:/app/lessons.py
+      - ./dashboard/static:/app/static
     depends_on:
       - attacker
       - victim

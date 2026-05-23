@@ -2,6 +2,7 @@ import os, json, time, threading
 import requests as req
 from flask import Flask, request, jsonify, send_from_directory
 from flask_socketio import SocketIO, emit
+from livereload import Server
 from lessons import LESSONS
 
 app = Flask(__name__, static_folder="static", static_url_path="")
@@ -9,6 +10,7 @@ sio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 ATTACKER = os.environ.get("ATTACKER_URL", "http://172.20.0.20:5001")
 VICTIM   = os.environ.get("VICTIM_URL",   "http://172.20.0.10:8080")
+DEBUG    = os.environ.get("FLASK_DEBUG", "0") == "1"
 
 @app.route("/")
 def index():
@@ -67,4 +69,11 @@ def on_connect():
     emit("connected", {"msg": "Dashboard ready"})
 
 if __name__ == "__main__":
-    sio.run(app, host="0.0.0.0", port=3000, debug=False, allow_unsafe_werkzeug=True)
+    if DEBUG:
+        server = Server(app.wsgi_app)
+        server.watch("static/")
+        server.watch("lessons.py")
+        server.watch("app.py")
+        server.serve(host="0.0.0.0", port=3000)
+    else:
+        sio.run(app, host="0.0.0.0", port=3000, debug=False, allow_unsafe_werkzeug=True)

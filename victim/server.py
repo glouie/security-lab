@@ -6,6 +6,7 @@ app = Flask(__name__)
 
 WEBHOOK_SECRET = os.environ.get("WEBHOOK_SECRET", "whsec_dev_secret_12345")
 REDIS_URL      = os.environ.get("REDIS_URL", "redis://localhost:6379")
+DEBUG          = os.environ.get("FLASK_DEBUG", "0") == "1"
 rdb            = Redis.from_url(REDIS_URL, decode_responses=True)
 
 CONFIG = {
@@ -125,9 +126,9 @@ def state():
 
 if __name__ == "__main__":
     http_thread = threading.Thread(
-        target=lambda: app.run(host="0.0.0.0", port=8080, debug=False), daemon=True)
+        target=lambda: app.run(host="0.0.0.0", port=8080, debug=DEBUG, use_reloader=False), daemon=True)
     http_thread.start()
     ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     ctx.load_cert_chain("/certs/server.crt", "/certs/server.key")
     ctx.minimum_version = ssl.TLSVersion.TLSv1_2
-    app.run(host="0.0.0.0", port=8443, ssl_context=ctx, debug=False)
+    app.run(host="0.0.0.0", port=8443, ssl_context=ctx, debug=DEBUG, use_reloader=False)
